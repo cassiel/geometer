@@ -10,7 +10,7 @@
                  [weasel                    "0.7.0"     :scope "test"]
                  [org.clojure/tools.nrepl   "0.2.12"    :scope "test"]
 
-                 [thi.ng/geom "0.0.1046"]
+                 [thi.ng/geom "0.0.1158-SNAPSHOT"]
                  [thi.ng/domus "0.3.0-SNAPSHOT"]])
 
 (require
@@ -45,5 +45,3 @@
   []
   (comp (development)
         (run)))
-
-

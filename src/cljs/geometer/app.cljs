@@ -1,21 +1,22 @@
 (ns geometer.app
-  (:require [thi.ng.domus.core               :as dom]
-            [thi.ng.geom.core                :as g]
-            [thi.ng.geom.vector              :as v :refer [vec2 vec3]]
-            [thi.ng.geom.matrix              :as mat :refer [M44]]
-            [thi.ng.geom.utils               :as gu]
-            [thi.ng.geom.rect                :refer [rect]]
-            [thi.ng.geom.webgl.core          :as gl]
-            [thi.ng.geom.webgl.animator      :refer [animate]]
-            [thi.ng.geom.webgl.constants     :as glc]
-            [thi.ng.geom.webgl.shaders       :as sh]
-            [thi.ng.geom.webgl.shaders.phong :as phong]
-            [thi.ng.math.core                :as m]
-            [thi.ng.typedarrays.core         :refer [float32]]
-            [geometer.csg                    :as csg]
-            [geometer.lsystem                :as lsystem]
-            [geometer.shapes                 :as shapes]
-            [geometer.turtle                 :as turtle]))
+  (:require [thi.ng.domus.core              :as dom]
+            [thi.ng.geom.core               :as g]
+            [thi.ng.geom.vector             :as v :refer [vec2 vec3]]
+            [thi.ng.geom.matrix             :as mat :refer [M44]]
+            [thi.ng.geom.utils              :as gu]
+            [thi.ng.geom.rect               :refer [rect]]
+            [thi.ng.geom.gl.core            :as gl]
+            [thi.ng.geom.gl.webgl.animator  :refer [animate]]
+            [thi.ng.geom.gl.webgl.constants :as glc]
+            [thi.ng.geom.gl.shaders         :as sh]
+            [thi.ng.geom.gl.shaders.phong   :as phong]
+            [thi.ng.geom.gl.buffers         :as buf]
+            [thi.ng.math.core               :as m]
+            [thi.ng.typedarrays.core        :refer [float32]]
+            [geometer.csg                   :as csg]
+            [geometer.lsystem               :as lsystem]
+            [geometer.shapes                :as shapes]
+            [geometer.turtle                :as turtle]))
 
 (enable-console-print!)
 
@@ -42,7 +43,7 @@
   [mesh]
   (reset! model
           (-> (g/center mesh)
-              (gl/as-webgl-buffer-spec {})
+              (gl/as-gl-buffer-spec {})
               (assoc :shader (sh/make-shader-from-spec gl phong/shader-spec))
               (update-in [:uniforms] merge
                          {:proj          @projection
@@ -159,17 +160,17 @@
     (gl/clear-color-buffer gl 0 0 0 0) ;; 0 opacity, so we see the bg gradient
     (gl/clear-depth-buffer gl 1)
     (gl/enable gl glc/depth-test)
-    (phong/draw gl
-                (update model :uniforms merge
-                        {:proj  (@projection id)
-                         :view  (mat/look-at (vec3 eye-sep 0 2) (vec3) (vec3 0 1 0))}))
+    (buf/draw-arrays-with-shader gl
+                                 (update model :uniforms merge
+                                         {:proj (@projection id)
+                                          :view (mat/look-at (vec3 eye-sep 0 2) (vec3) (vec3 0 1 0))}))
     (gl/disable gl glc/scissor-test)))
 
 (defn ^:export start
   "This function is called when 'index.html' loads. We use it to kick off mouse tracking, a keyboard handler and the animation loop."
   []
   ;; set up the options menu
-  (dom/create-dom! options-markup (dom/by-id "options"))  
+  (dom/create-dom! options-markup (dom/by-id "options"))
 
   ;; event handlers
   (.addEventListener js/document "keypress" keypress-handler)

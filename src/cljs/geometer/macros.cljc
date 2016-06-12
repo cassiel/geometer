@@ -24,8 +24,9 @@
          (update (assoc t# :last-angle ~'angle)
                  :matrix ~rot-fn (m/radians ~expr))))))
 
-(defmacro defshape [name body]
-  "Creates a new shape primtive called `name` that handles turtle matrix updates, bookkeeping for :last-length and provides `length` to the lexical environment of `body`."
+(defmacro defshape
+  "Creates a new shape primitive called `name` that handles turtle matrix updates, bookkeeping for :last-length and provides `length` to the lexical environment of `body`."
+  [name body]
   `(defn ~name [t#]
      (let [~'length ((:length-fn t#) t#)]
        (assoc t#
